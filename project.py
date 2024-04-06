@@ -133,7 +133,7 @@ for index, node_pair in enumerate(R):
 exp = expr(booleanExpr)
 RR = expr2bdd(exp)
 
-### RR Tests ###
+### RR Tests -- Checks whether or not pair of nodes are connected. ###
 xx_vars = [xx0, xx1, xx2, xx3, xx4]
 yy_vars = [yy0, yy1, yy2, yy3, yy4]
 
