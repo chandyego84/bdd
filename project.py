@@ -35,10 +35,10 @@ def decToBinOfNBits(num, n = 5):
     return bin(num)[2:].zfill(n)
 
 """
-Test if the pair of nodes (node_i, node_j) satisfies the BDD RR.
+Test if the pair of nodes (node_i, node_j) satisfies the BDD.
 Returns True if the pair satisfies RR, False otherwise.
 """
-def testPairSatisfy(node_i, node_j, RR, xx_vars, yy_vars):
+def testPairSatisfy(node_i, node_j, BDD, xx_vars, yy_vars):
     # Convert node_i and node_j to binary strings
     bin_node_i = decToBinOfNBits(node_i)
     bin_node_j = decToBinOfNBits(node_j)
@@ -51,7 +51,7 @@ def testPairSatisfy(node_i, node_j, RR, xx_vars, yy_vars):
         assignment[yy_vars[i]] = bool(int(bit))
 
     # Evaluate RR with the assignment
-    truth_value = RR.restrict(assignment)
+    truth_value = BDD.restrict(assignment)
 
     # If truth_value is a constant BDD, check its value
     if isinstance(truth_value, BDDConstant):
