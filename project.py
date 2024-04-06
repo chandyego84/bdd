@@ -60,6 +60,28 @@ def testPairSatisfy(node_i, node_j, BDD, xx_vars, yy_vars):
     # Otherwise, check if it is not the constant False
     return not truth_value.is_const_false()
 
+"""
+Test if a number satisfies the BDD.
+Returns True if the number satisfies the BDD, False otherwise.
+"""
+def testNumberSatisfy(num, BDD, vars):
+    # Convert the number to a binary string
+    bin_num = decToBinOfNBits(num)
+
+    # Create a boolean assignment for BDD's variables
+    assignment = {}
+    for i, bit in enumerate(bin_num):
+        assignment[vars[i]] = bool(int(bit))
+    
+    # Evalute BDD with assignment
+    truth_value = BDD.restrict(assignment)
+
+    # If truth_value is a constant BDD, check value
+    if isinstance(truth_value, BDDConstant):
+        return truth_value.value
+    
+    return not truth_value.is_const_false()
+
 
 # set of node pairs satisfying the edge relation
 R = []
@@ -100,7 +122,7 @@ zz3 = bddvar('zz3')
 zz4 = bddvar('zz4')
 ### BDD VARS ###
 
-# Create a long boolean expression for R
+#------------ Create a long boolean expression for R ------------#
 booleanExpr = ""
 for index, node_pair in enumerate(R):
     node_i = node_pair[0]
@@ -133,7 +155,32 @@ for index, node_pair in enumerate(R):
 exp = expr(booleanExpr)
 RR = expr2bdd(exp)
 
-### RR Tests -- Checks whether or not pair of nodes are connected. ###
+#------------ Create a long boolean expression for EVEN numbers (over yy vars) ------------#
+EVEN = [decToBinOfNBits(num) for num in range(0, NUM_NODES, 2)] # get even numbers from 0 - 31
+
+booleanExpr = ""
+for index, num in enumerate(EVEN):
+    for n in range(len(num)):
+        if not int(num[n]): # indicates binary 0
+            booleanExpr += " ~"
+        
+        booleanExpr += f"yy{n}"
+
+        if n < (len(num) - 1): # only add & if not at last digit of the binary num
+            booleanExpr += " & "
+    
+    if index < (len(EVEN) - 1): # if not the last binary number
+        booleanExpr += " | "
+
+# Create BDD EVEN_BDD
+exp = expr(booleanExpr)
+EVEN_BDD = expr2bdd(exp)
+
+
+#------------ Create a long boolean expression for PRIME numbers ------------#
+
+
+### BDD Tests -- Checks whether or not certain nodes satisfy created BDDs. ###
 xx_vars = [xx0, xx1, xx2, xx3, xx4]
 yy_vars = [yy0, yy1, yy2, yy3, yy4]
 
@@ -144,4 +191,8 @@ bin_20 = decToBinOfNBits(20)
 
 print(f"RR(27, 3) -- Expected: 1, Actual: {testPairSatisfy(27, 3, RR, xx_vars, yy_vars)}")
 print(f"RR(16, 20) -- Expected: 0, Actual: {testPairSatisfy(16, 20, RR, xx_vars, yy_vars)}")
-### RR Tests ###
+print(f"EVEN_BDD(14) -- Expected: 1, Actual: {testNumberSatisfy(14, EVEN_BDD, yy_vars)}")
+print(f"EVEN_BDD(13) -- Expected: 0, Actual: {testNumberSatisfy(13, EVEN_BDD, yy_vars)}")
+print(f"PRIME_BDD(7) -- Expected: 1, Actual: ")
+print(f"PRIME_BDD(2) -- Expected: 0, Actual: ")
+### BDD Tests ###
