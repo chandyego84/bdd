@@ -176,9 +176,29 @@ for index, num in enumerate(EVEN):
 exp = expr(booleanExpr)
 EVEN_BDD = expr2bdd(exp)
 
-
 #------------ Create a long boolean expression for PRIME numbers ------------#
+PRIME = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31] # explicit list of prime numbers
+PRIME = [decToBinOfNBits(num) for num in PRIME]
 
+booleanExpr = ""
+for index, num in enumerate(PRIME):
+    for n in range(len(num)):
+        if not int(num[n]): # indicates binary 0
+            booleanExpr += " ~"
+        
+        booleanExpr += f"xx{n}"
+
+        if n < (len(num) - 1): # only add & if not at last digit of binary num
+            booleanExpr += " & "
+        
+    
+    if index < (len(PRIME) - 1):
+        booleanExpr += " | "
+
+# Create BDD for PRIME numbers
+exp = expr(booleanExpr)
+PRIME_BDD = expr2bdd(exp)
+            
 
 ### BDD Tests -- Checks whether or not certain nodes satisfy created BDDs. ###
 xx_vars = [xx0, xx1, xx2, xx3, xx4]
@@ -193,6 +213,6 @@ print(f"RR(27, 3) -- Expected: 1, Actual: {testPairSatisfy(27, 3, RR, xx_vars, y
 print(f"RR(16, 20) -- Expected: 0, Actual: {testPairSatisfy(16, 20, RR, xx_vars, yy_vars)}")
 print(f"EVEN_BDD(14) -- Expected: 1, Actual: {testNumberSatisfy(14, EVEN_BDD, yy_vars)}")
 print(f"EVEN_BDD(13) -- Expected: 0, Actual: {testNumberSatisfy(13, EVEN_BDD, yy_vars)}")
-print(f"PRIME_BDD(7) -- Expected: 1, Actual: ")
-print(f"PRIME_BDD(2) -- Expected: 0, Actual: ")
+print(f"PRIME_BDD(7) -- Expected: 1, Actual: {testNumberSatisfy(7, PRIME_BDD, xx_vars)}")
+print(f"PRIME_BDD(2) -- Expected: 0, Actual: {testNumberSatisfy(2, PRIME_BDD, xx_vars)}")
 ### BDD Tests ###
