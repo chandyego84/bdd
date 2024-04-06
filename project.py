@@ -198,16 +198,43 @@ for index, num in enumerate(PRIME):
 # Create BDD for PRIME numbers
 exp = expr(booleanExpr)
 PRIME_BDD = expr2bdd(exp)
-            
+
+#------------ Compute BDD RR2 for the set RoR, from BDD RR ------------#
+###
+# RR2 encodes the set of node pairs such that one can reach the other in two steps.
+###
+
+### There exists a zz1-zz5 such that RR(xx1-xx5; zz1-zz5) and RR(zz1-zz5; yy1-yy5) is true ###
+# replace yy1-yy5 with zz1-zz5
+BDD1 = RR.compose({yy0: zz0, yy1: zz1, yy2: zz2, yy3: zz3, yy4: zz4})
+# replace xx1-xx5 with zz1-zz5
+BDD2 = RR.compose({xx0: zz0, xx1: zz1, xx2: zz2, xx3: zz3, xx4: zz4})
+
+# same as existential quntification operator: there exists {zz1, ..., zz4} in f
+RR2 = (BDD1 & BDD2).smoothing((zz0, zz1, zz2, zz3, zz4))
+
+#------------ Compute BDD transitive closure RR2star of RR2. RR2star encodes set of all node pairs 
+#------------ such that one can reach the other in a positive even number of steps. ------------#
+H = RR2
+while True:
+    H_prime = H
+    n1 = H_prime.compose({yy0: zz0, yy1: zz1, yy2: zz2, yy3: zz3, yy4: zz4})
+    n2 = RR2.compose({xx0: zz0, xx1: zz1, xx2: zz2, xx3: zz3, xx4: zz4})
+    nxtFormula = (n1 & n2).smoothing((zz0, zz1, zz2, zz3, zz4))
+    
+    H = H_prime | nxtFormula
+
+    if (H.equivalent(H_prime)):
+        # Must be true eventually:
+        # For all nodes u, v in graph: 
+        # u can reach v in 1 or more steps iff u can reach v within n steps
+        break
+
+RR2_STAR = H
 
 ### BDD Tests -- Checks whether or not certain nodes satisfy created BDDs. ###
 xx_vars = [xx0, xx1, xx2, xx3, xx4]
 yy_vars = [yy0, yy1, yy2, yy3, yy4]
-
-bin_27 = decToBinOfNBits(27)
-bin_3 = decToBinOfNBits(3)
-bin_16 = decToBinOfNBits(16)
-bin_20 = decToBinOfNBits(20)
 
 print(f"RR(27, 3) -- Expected: 1, Actual: {testPairSatisfy(27, 3, RR, xx_vars, yy_vars)}")
 print(f"RR(16, 20) -- Expected: 0, Actual: {testPairSatisfy(16, 20, RR, xx_vars, yy_vars)}")
@@ -215,4 +242,7 @@ print(f"EVEN_BDD(14) -- Expected: 1, Actual: {testNumberSatisfy(14, EVEN_BDD, yy
 print(f"EVEN_BDD(13) -- Expected: 0, Actual: {testNumberSatisfy(13, EVEN_BDD, yy_vars)}")
 print(f"PRIME_BDD(7) -- Expected: 1, Actual: {testNumberSatisfy(7, PRIME_BDD, xx_vars)}")
 print(f"PRIME_BDD(2) -- Expected: 0, Actual: {testNumberSatisfy(2, PRIME_BDD, xx_vars)}")
+print(f"RR2(27, 6) -- Expected: 1, Actual: {testPairSatisfy(27, 6, RR2, xx_vars, yy_vars)}")
+print(f"RR2(27, 9) -- Expected: 0, Actual: {testPairSatisfy(27, 9, RR2, xx_vars, yy_vars)}")
+print(f"Number of satisfying inputs on RR2_STAR: {RR2_STAR.satisfy_count()}")
 ### BDD Tests ###
