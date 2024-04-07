@@ -232,6 +232,14 @@ while True:
 
 RR2_STAR = H
 
+#------------ StatementA: For all u, (PRIME(u) -> There exists v, EVEN(v) & RRstar(u, v))
+### Check if this statement is true or not. ###
+
+CONCLUSION = EVEN_BDD & RR2_STAR # BDD for conclusion of statement
+
+# Statement A = X -> Y == ~X or Y
+STATEMENT = ~PRIME_BDD | CONCLUSION.smoothing((yy0, yy1, yy2, yy3, yy4)) # BDD for Statement A
+
 ### BDD Tests -- Checks whether or not certain nodes satisfy created BDDs. ###
 xx_vars = [xx0, xx1, xx2, xx3, xx4]
 yy_vars = [yy0, yy1, yy2, yy3, yy4]
@@ -245,4 +253,15 @@ print(f"PRIME_BDD(2) -- Expected: 0, Actual: {testNumberSatisfy(2, PRIME_BDD, xx
 print(f"RR2(27, 6) -- Expected: 1, Actual: {testPairSatisfy(27, 6, RR2, xx_vars, yy_vars)}")
 print(f"RR2(27, 9) -- Expected: 0, Actual: {testPairSatisfy(27, 9, RR2, xx_vars, yy_vars)}")
 print(f"Number of satisfying inputs on RR2_STAR: {RR2_STAR.satisfy_count()}")
+print("---------------------------------------------")
+print(f"Statement A: For all u, (PRIME(u) -> There exists v, EVEN(v) & RRstar(u, v))")
+print(f"Statement A: {STATEMENT.equivalent(True)}")
+
+assertion = ""
+if (str(STATEMENT.satisfy_one()) == "{}"):
+    assertion = "tautology"
+else:
+    assertion = "contradiction"
+
+print(f"Based on the BDD for Statement A, Statement A is a {assertion}")
 ### BDD Tests ###
